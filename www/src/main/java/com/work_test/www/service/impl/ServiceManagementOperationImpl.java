@@ -11,7 +11,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -32,6 +31,11 @@ public class ServiceManagementOperationImpl implements ServiceManagementOperatio
         this.entityManager = entityManager;
     }
 
+    /**
+     * Метод создает новую банковскую карту
+     * @param numberCard
+     * @return Card (возвращает созданную карту с номером)
+     */
     @Override
     public Card getAddCard(Long numberCard) {
         Card card = Card.builder()
@@ -41,6 +45,11 @@ public class ServiceManagementOperationImpl implements ServiceManagementOperatio
         return card;
     }
 
+    /**
+     * Метод блокирует карту
+     * @param cardId
+     * @return Информационное сообщение о блокировке карты с отображением номера карты
+     */
     @Override
     public String getBlockCard(Long cardId) {
         Card card = entityManager.find(Card.class, cardId);
@@ -50,6 +59,12 @@ public class ServiceManagementOperationImpl implements ServiceManagementOperatio
         return "Card with number = " + card.getCardNumber() + " is blocked";
     }
 
+
+    /**
+     * Метод активирует карту
+     * @param cardId
+     * @return Информационное сообщение об активации карты с отображением номера карты
+     */
     @Override
     public String getActivateCard(Long cardId) {
         Card card = entityManager.find(Card.class, cardId);
@@ -60,6 +75,10 @@ public class ServiceManagementOperationImpl implements ServiceManagementOperatio
         return "Card with number = " + card.getCardNumber() + " is activated";
     }
 
+    /**
+     * Метод удаляет карту из базы данных
+     * @param cardId
+     */
     @Override
     public void getDeleteCard(Long cardId) {
         Card card = entityManager.find(Card.class, cardId);
@@ -70,11 +89,21 @@ public class ServiceManagementOperationImpl implements ServiceManagementOperatio
         }
     }
 
+    /**
+     * Метод отображает все карты из базы данных
+     * @return
+     */
     @Override
     public Collection<Card> getAllCard() {
         return cardRepository.findAll();
     }
 
+    /**
+     * Метод присваивает карту пользователю
+     * @param userId
+     * @param cardId
+     * @return Возвращает пользователя. Отображает информацию о пользователе и актуальный список привязанных карт
+     */
     @Override
     public User getAddCardToClient(Long userId, Long cardId) {
         User user = entityManager.find(User.class, userId);
@@ -83,6 +112,12 @@ public class ServiceManagementOperationImpl implements ServiceManagementOperatio
         return user;
     }
 
+    /**
+     * Метод отвязывает карту от пользователя
+     * @param userId
+     * @param cardId
+     * @return Возвращает пользователя. Отображает информацию о пользователе и актуальный список привязанных карт
+     */
     @Override
     public User getDeleteCardToClient(Long userId, Long cardId) {
         Card card = entityManager.find(Card.class, cardId);
@@ -91,6 +126,12 @@ public class ServiceManagementOperationImpl implements ServiceManagementOperatio
         return user;
     }
 
+    /**
+     * Метод осуществляет перевод денежных средств между картами пользователя
+     * @param cardIdOutput
+     * @param cardIdInput
+     * @param sum
+     */
     @Override
     public void getTrafficCash(Long cardIdOutput, Long cardIdInput, double sum) {
         Card cardOut = entityManager.find(Card.class, cardIdOutput);
@@ -99,11 +140,23 @@ public class ServiceManagementOperationImpl implements ServiceManagementOperatio
         cardIn.setBalanceCard(cardIn.getBalanceCard() + sum);
     }
 
+    /**
+     * Метод отображает состояние баланса карты
+     * @param cardId
+     * @return Возвращает сумму денежных средств
+     */
     @Override
     public Double getBalance(Long cardId) {
         return entityManager.find(Card.class, cardId).getBalanceCard();
     }
 
+    /**
+     * Метод возвращает список карт пользователя, которые привязаны к пользователю
+     * @param userId
+     * @param page
+     * @param size
+     * @return
+     */
     @Override
     public Page<Card> getAllCardsToUser(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -111,6 +164,12 @@ public class ServiceManagementOperationImpl implements ServiceManagementOperatio
         return userRepository.findById(userId, pageable);
     }
 
+    /**
+     * Приватный метод, используемый в переопределенном методе для удаления карты
+     * @param cards
+     * @param card
+     * @return
+     */
     private Set<Card> deleteCard(Set<Card> cards, Card card) {
         cards.remove(card);
         return cards;
