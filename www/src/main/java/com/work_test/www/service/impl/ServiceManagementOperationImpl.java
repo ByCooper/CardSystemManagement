@@ -32,6 +32,11 @@ public class ServiceManagementOperationImpl implements ServiceManagementOperatio
         this.entityManager = entityManager;
     }
 
+    /**
+     *
+     * @param numberCard
+     * @return
+     */
     @Override
     public Card getAddCard(Long numberCard) {
         Card card = Card.builder()
