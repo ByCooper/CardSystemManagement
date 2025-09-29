@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: www
+  datasource:
+    url: jdbc:postgresql://localhost:5432/BankSystemCardManagement
+    username: student
+    password: chocolatefrog
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        jakarta.persistence.access: field
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  liquibase:
+    change-log: classpath:liquibase/changelog-master.yml
+
+logging:
+  level:
+    root: info
+
+server:
+  port: 8080
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    doc-expansion: none
+    tags-sorter: alpha
+    operations-sorter: method
+    enabled: true
+  api-docs:
+    path: /api-docs
+  default-produces-media-type: application/json
