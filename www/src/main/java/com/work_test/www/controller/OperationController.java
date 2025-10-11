@@ -18,24 +18,24 @@ import java.util.Optional;
 @RequestMapping("/bank")
 public class OperationController {
 
-
-    @GetMapping("/hello")
-    @Operation(summary = "Приветствие")
-    public String getHi(){
-        return "Hello Bitch!";
-    }
-
-    @PostMapping("/gou")
-    @Operation(summary = "Просмотреть карту по id")
-    public Optional<Card> getGou(@RequestParam Long id){
-        return cardRepository.findById(id);
-    }
-
-    @PostMapping("/getUser")
-    @Operation(summary = "Получение пользователя")
-    public Optional<User> getUser(@RequestParam Long id){
-        return userRepository.findById(id);
-    }
+//
+//    @GetMapping("/hello")
+//    @Operation(summary = "Приветствие")
+//    public String getHi(){
+//        return "Hello Bitch!";
+//    }
+//
+//    @PostMapping("/gou")
+//    @Operation(summary = "Просмотреть карту по id")
+//    public Optional<Card> getGou(@RequestParam Long id){
+//        return cardRepository.findById(id);
+//    }
+//
+//    @PostMapping("/getUser")
+//    @Operation(summary = "Получение пользователя")
+//    public Optional<User> getUser(@RequestParam Long id){
+//        return userRepository.findById(id);
+//    }
 
     private final ServiceManagementOperation service;
     private final UserRepository userRepository;
@@ -76,7 +76,7 @@ public class OperationController {
 
     @PostMapping("/delete-card")
     @Operation(summary = "Удаление карты")
-    public ResponseEntity<?> getDeleteCard(@RequestBody Long numberCard) {
+    public ResponseEntity<String> getDeleteCard(@RequestBody Long numberCard) {
         if (cardRepository.findById(numberCard).isEmpty()) {
             ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         } else {
@@ -97,7 +97,7 @@ public class OperationController {
 
     @PostMapping("/delete-to-user")
     @Operation(summary = "Удаление карты из списка карт клиента")
-    public ResponseEntity<?> getDeleteCardToClient(@RequestParam("userId") Long userId,
+    public ResponseEntity<User> getDeleteCardToClient(@RequestParam("userId") Long userId,
                                                    @RequestParam("cardId") Long cardId) {
         if (userRepository.findById(userId).isPresent() || cardRepository.findById(cardId).isPresent()) {
             ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -133,7 +133,7 @@ public class OperationController {
 
     @PostMapping("/card/traffic")
     @Operation(summary = "Перевод средств между своими счетами карт")
-    public ResponseEntity<?> getTrafficCash(@RequestParam Long numberOutput,
+    public ResponseEntity<String> getTrafficCash(@RequestParam Long numberOutput,
                                             @RequestParam Long numberInput,
                                             @RequestParam Double sum) {
         service.getTrafficCash(numberOutput, numberInput, sum);
