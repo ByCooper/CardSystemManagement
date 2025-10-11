@@ -80,10 +80,11 @@ public class ServiceManagementOperationImpl implements ServiceManagementOperatio
      * @param cardId
      */
     @Override
-    public void getDeleteCard(Long cardId) {
+    public String getDeleteCard(Long cardId) {
         Card card = entityManager.find(Card.class, cardId);
         if (card != null) {
             entityManager.remove(card);
+            return "Удалена карта " + card.getCardNumber();
         } else {
             throw new RuntimeException("Card not found " + card);
         }
@@ -133,11 +134,12 @@ public class ServiceManagementOperationImpl implements ServiceManagementOperatio
      * @param sum
      */
     @Override
-    public void getTrafficCash(Long cardIdOutput, Long cardIdInput, double sum) {
+    public String getTrafficCash(Long cardIdOutput, Long cardIdInput, double sum) {
         Card cardOut = entityManager.find(Card.class, cardIdOutput);
         Card cardIn = entityManager.find(Card.class, cardIdInput);
         cardOut.setBalanceCard(cardOut.getBalanceCard() - sum);
         cardIn.setBalanceCard(cardIn.getBalanceCard() + sum);
+        return "Перевод между счетами " + '\n' + "Пополнение карты " + cardIdInput + " на сумму: " + sum + '\n' + "Списание с карты " + cardIdOutput + " на сумму: " + sum;
     }
 
     /**
