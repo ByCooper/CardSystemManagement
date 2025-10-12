@@ -6,6 +6,7 @@ import com.work_test.www.dto.LoginRequest;
 import com.work_test.www.dto.RegisterRequest;
 import com.work_test.www.jwt.JwtUtils;
 import com.work_test.www.model.Role;
+import com.work_test.www.model.RoleName;
 import com.work_test.www.model.User;
 import com.work_test.www.repo.RoleRepository;
 import com.work_test.www.repo.UserRepository;
@@ -51,13 +52,13 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request){
-        if(userRepository.existsByUsername(request.getUserName())){
+        if(userRepository.existsByName(request.getUserName())){
             return ResponseEntity.badRequest().body("Ошибка: пользователь существует!");
         }
         User user = new User();
         user.setName(request.getUserName());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        Role userRole = roleRepository.findByRole(String.valueOf(request.getRole())).orElseThrow(() -> new RuntimeException("Ошибка: роли не существует"));
+        Role userRole = roleRepository.findByRole(request.getRole()).orElseThrow();
         user.setRoles(Collections.singleton(userRole));
         userRepository.save(user);
         return ResponseEntity.ok("Пользователь успешно зарегистрирован");

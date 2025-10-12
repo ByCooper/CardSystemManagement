@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findById(Long userId);
-    Optional<User> findByUsername(String userName);
+    Optional<User> findByName(String name);
     Page<Card> findById(Long userId, Pageable pageable);
-    boolean existsByUsername(String userName);
+    boolean existsByName(String userName);
 }

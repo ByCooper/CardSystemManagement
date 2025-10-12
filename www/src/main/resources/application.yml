@@ -37,3 +37,9 @@ springdoc:
   api-docs:
     path: /api-docs
   default-produces-media-type: application/json
+  jwt:
+    secret:
+      "mySuperSecretKey64"
+    expiration: 86400000
+    header: "Authorization"
+    prefix: "Bearer "
