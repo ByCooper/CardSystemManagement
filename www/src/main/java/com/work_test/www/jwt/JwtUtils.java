@@ -2,6 +2,7 @@ package com.work_test.www.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -10,8 +11,8 @@ import java.util.Date;
 @Component
 public class JwtUtils {
 
-    private String secret; //секретный ключ
-    private long expiration; //указываем время жизни токена
+    private final String secret = "MySuperSecretKey64"; //секретный ключ
+    private final long expiration = 86400000; //указываем время жизни токена
 
     /**
      * Генерация JWT-токена
