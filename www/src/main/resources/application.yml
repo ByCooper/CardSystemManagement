@@ -7,6 +7,7 @@ spring:
     password: chocolatefrog
     driver-class-name: org.postgresql.Driver
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: update
     show-sql: true
@@ -38,8 +39,5 @@ springdoc:
     path: /api-docs
   default-produces-media-type: application/json
   jwt:
-    secret:
-      "mySuperSecretKey64"
-    expiration: 86400000
     header: "Authorization"
     prefix: "Bearer "

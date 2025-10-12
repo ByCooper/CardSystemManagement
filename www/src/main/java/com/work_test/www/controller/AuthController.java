@@ -6,12 +6,13 @@ import com.work_test.www.dto.LoginRequest;
 import com.work_test.www.dto.RegisterRequest;
 import com.work_test.www.jwt.JwtUtils;
 import com.work_test.www.model.Role;
-import com.work_test.www.model.RoleName;
 import com.work_test.www.model.User;
 import com.work_test.www.repo.RoleRepository;
 import com.work_test.www.repo.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,19 +41,25 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request){
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                request.getUserName(),
-                request.getPassword()
-        ));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateToken((UserDetails) authentication.getPrincipal());
-        return ResponseEntity.ok(new JwtResponse(jwt));
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    request.getUserName(),
+                    request.getPassword()
+            ));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtUtils.generateToken((UserDetails) authentication.getPrincipal());
+            return ResponseEntity.ok(new JwtResponse(jwt));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(401).body("Invalid credentials");
+        } catch (DisabledException e) {
+            return ResponseEntity.status(401).body("User disabled4");
+        }
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request){
-        if(userRepository.existsByName(request.getUserName())){
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+        if (userRepository.existsByName(request.getUserName())) {
             return ResponseEntity.badRequest().body("Ошибка: пользователь существует!");
         }
         User user = new User();
@@ -65,7 +72,7 @@ public class AuthController {
     }
 
     @GetMapping("/check")
-    public  String checkUrl(){
+    public String checkUrl() {
         return "Чик-чирик";
     }
 }
