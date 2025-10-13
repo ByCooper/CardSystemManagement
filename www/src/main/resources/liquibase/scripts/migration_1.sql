@@ -46,5 +46,5 @@ CREATE TABLE "clients_roles"
 );
 
 INSERT INTO role (id, role)
-VALUES (1, 'ADMIN'),
-        (2, 'USER');
+VALUES (1, 'ROLE_ADMIN'),
+        (2, 'ROLE_USER');

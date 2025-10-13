@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 
 @RestController
-@RequestMapping("/www/auth")
+@RequestMapping("/bank/auth")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -44,7 +44,7 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                    request.getUserName(),
+                    request.getUsername(),
                     request.getPassword()
             ));
             SecurityContextHolder.getContext().setAuthentication(authentication);
