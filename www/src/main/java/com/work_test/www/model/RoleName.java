@@ -1,5 +1,5 @@
 package com.work_test.www.model;
 
 public enum RoleName {
-    ADMIN, USER
+    ROLE_ADMIN, ROLE_USER;
 }
