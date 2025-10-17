@@ -36,12 +36,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        final String jwt = authHeader.substring(7);//Извлекаем токен (после "Bearer "
-        if(jwtUtils.validateToken(jwt)){
-            //Получаем имя пользователя
-            String username = jwtUtils.getUsernameFromToken(jwt);
+        String jwt = authHeader.substring(7);//Извлекаем токен (после "Bearer ")
+        //Получаем имя пользователя
+        String username = jwtUtils.extractUsername(jwt);
+
+        if(username!= null && SecurityContextHolder.getContext().getAuthentication() == null) {
             //Загружаем пользователя из БД
+        }
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        if(jwtUtils.isValid(jwt, userDetails)){
+
             //Создаем объект аутентификации
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
