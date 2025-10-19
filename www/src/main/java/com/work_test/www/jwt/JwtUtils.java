@@ -6,8 +6,6 @@ import com.work_test.www.security.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SignatureException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -48,19 +46,19 @@ public class JwtUtils {
      */
     public boolean isValid(String token, UserDetails user){
 
-        String username = extractUsername(token);
+        String usernameToken = extractUsername(token);
         boolean isValidToken = tokenRepository.findByAccessToken(token)
                 .map(t -> !t.isLoggedOut()).orElse(false);
 
-        return username.equals(user.getUsername()) && isAccessTokenExpired(token) && isValidToken;
+        return usernameToken.equals(user.getUsername()) && isAccessTokenExpired(token) && isValidToken;
     }
 
     public boolean isValidRefreshToken(String token, User user){
-        String username = extractUsername(token);
+        String usernameToken = extractUsername(token);
         boolean isValidRefreshToken = tokenRepository.findByRefreshToken(token)
                 .map(t -> !t.isLoggedOut()).orElse(false);
 
-        return username.equals(user.getName()) && isAccessTokenExpired(token) && isValidRefreshToken;
+        return usernameToken.equals(user.getName()) && isAccessTokenExpired(token) && isValidRefreshToken;
     }
 
     /**

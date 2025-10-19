@@ -98,28 +98,30 @@ public class AuthenticationService {
         return new JwtResponse(accessToken, refreshToken);
     }
 
-    public ResponseEntity<JwtResponse> refreshToken(HttpServletRequest request){
+    public ResponseEntity<JwtResponse> refreshToken(HttpServletRequest request, HttpServletResponse response){
         String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        logger.info("Получение заголовков авторизации: {}" , authorizationHeader);
 
         if(authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
+        logger.info("Заловки не пустые и соответствуют");
+        logger.info("Получаем тело токена");
         String token = authorizationHeader.substring(7);
+        logger.info("Тело токена получено: {}", token);
         String username = jwtUtils.extractUsername(token);
-
+        logger.info("Имя из токена получено");
+        logger.info("Проверка наличия пользователя");
         User user = userRepository.findByName(username).orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
-
+        logger.info("Пользователь существует, получен");
         if(jwtUtils.isValidRefreshToken(token, user)){
             String accessToken = jwtUtils.generateAccessToken(user);
             String refreshToken = jwtUtils.generateRefreshToken(user);
-
             revokeAllToken(user);
-
             saveUserToken(accessToken, refreshToken, user);
-
             return ResponseEntity.ok(new JwtResponse(accessToken, refreshToken));
         }
+        logger.error("Не удалось обновить токен");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 

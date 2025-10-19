@@ -34,9 +34,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
-        System.out.println("inside method doFilterInternal");
+        logger.info("Зашел в метод doFilterInternal");
         try {
-            System.out.println("Зашел в try");
+            logger.info("Зашел в try");
             final String authHeader = request.getHeader("Authorization");//Получаем заголовок Authorization
             logger.info("Заголовок получен");
             //Проверяем наличие формата и заголовка
@@ -56,7 +56,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                 if (jwtUtils.isValid(jwt, userDetails)) {
-
                     //Создаем объект аутентификации
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
