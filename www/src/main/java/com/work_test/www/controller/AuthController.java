@@ -51,7 +51,7 @@ public class AuthController {
             HttpServletRequest request,
             HttpServletResponse response)
     {
-        return authenticationService.refreshToken(request);
+        return authenticationService.refreshToken(request, response);
     }
 
     @GetMapping("/check")
