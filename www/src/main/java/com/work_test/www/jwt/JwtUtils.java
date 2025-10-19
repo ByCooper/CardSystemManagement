@@ -2,6 +2,7 @@ package com.work_test.www.jwt;
 
 import com.work_test.www.model.User;
 import com.work_test.www.repo.TokenRepository;
+import com.work_test.www.security.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -48,18 +49,18 @@ public class JwtUtils {
     public boolean isValid(String token, UserDetails user){
 
         String username = extractUsername(token);
-        boolean isValidRefreshToken = tokenRepository.findByRefreshToken(token)
+        boolean isValidToken = tokenRepository.findByAccessToken(token)
                 .map(t -> !t.isLoggedOut()).orElse(false);
 
-        return username.equals(user.getUsername()) && isAccessTokenExpired(token) && isValidRefreshToken;
+        return username.equals(user.getUsername()) && isAccessTokenExpired(token) && isValidToken;
     }
 
     public boolean isValidRefreshToken(String token, User user){
         String username = extractUsername(token);
-        boolean isValidToken = tokenRepository.findByAccessToken(token)
+        boolean isValidRefreshToken = tokenRepository.findByRefreshToken(token)
                 .map(t -> !t.isLoggedOut()).orElse(false);
 
-        return username.equals(user.getName()) && isAccessTokenExpired(token) && isValidToken;
+        return username.equals(user.getName()) && isAccessTokenExpired(token) && isValidRefreshToken;
     }
 
     /**
@@ -100,11 +101,11 @@ public class JwtUtils {
     }
 
     public String generateAccessToken(User user){
-        return generateToken((UserDetails) user, accessTokenExpiration);
+        return generateToken(UserDetailsImpl.build(user), accessTokenExpiration);
     }
 
     public String generateRefreshToken(User user){
-        return generateToken((UserDetails) user, refreshTokenExpiration);
+        return generateToken(UserDetailsImpl.build(user), refreshTokenExpiration);
     }
 
     private SecretKey getSigningKey(){

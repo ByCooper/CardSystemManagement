@@ -33,6 +33,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody LoginRequest request) {
+        System.out.println("зашел в контроллер");
         return ResponseEntity.ok(authenticationService.login(request));
     }
 
@@ -50,7 +51,7 @@ public class AuthController {
             HttpServletRequest request,
             HttpServletResponse response)
     {
-        return authenticationService.refreshToken(request, response);
+        return authenticationService.refreshToken(request);
     }
 
     @GetMapping("/check")

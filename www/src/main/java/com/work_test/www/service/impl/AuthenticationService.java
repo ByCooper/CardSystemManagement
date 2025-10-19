@@ -12,11 +12,16 @@ import com.work_test.www.repo.TokenRepository;
 import com.work_test.www.repo.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
+@Transactional
 public class AuthenticationService {
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
@@ -32,7 +38,8 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final TokenRepository tokenRepository;
     private final RoleRepository roleRepository;
-    
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
 
     public AuthenticationService(UserRepository userRepository, JwtUtils jwtUtils, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, TokenRepository tokenRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
@@ -44,13 +51,16 @@ public class AuthenticationService {
     }
 
     public void register(RegisterRequest request){
+        if(userRepository.existsByName(request.getUserName())){
+            throw  new RuntimeException("Пользователь с таким именем уже существует!");
+        }
         User user = new User();
         user.setName(request.getUserName());
-        Role role = roleRepository.findByRole(request.getRole()).orElseThrow();
+        Role role = roleRepository.findByRole(request.getRole()).orElseThrow(() -> new RuntimeException("Роль не найдена: " + request.getRole()));
         user.setRoles(Collections.singleton(role));
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
-        System.out.println();
+        logger.info("Пользователь {} успешно зарегестрирован", request.getUserName());
     }
 
     private void revokeAllToken(User user){
@@ -73,25 +83,22 @@ public class AuthenticationService {
     }
 
     public JwtResponse login(LoginRequest loginRequest){
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getUsername(),
-                        loginRequest.getPassword()
-                )
-        );
-        User user = userRepository.findByName(loginRequest.getUsername()).orElseThrow();
-
+        System.out.println("зашел в метод login и пошел в аусменеджер");
+        authentication(loginRequest.getUsername(), loginRequest.getPassword());
+        System.out.println("Вышел из аусменеджера");
+        User user = userRepository.findByName(loginRequest.getUsername()).orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден!"));
+        System.out.println("начало генерации токенов");
         String accessToken = jwtUtils.generateAccessToken(user);
         String refreshToken = jwtUtils.generateRefreshToken(user);
-
+        System.out.println("токены готовы. иду в метод для валидации");
         revokeAllToken(user);
 
         saveUserToken(accessToken, refreshToken, user);
-
+        System.out.println("токены сохранены и валидированы");
         return new JwtResponse(accessToken, refreshToken);
     }
 
-    public ResponseEntity<JwtResponse> refreshToken(HttpServletRequest request, HttpServletResponse response){
+    public ResponseEntity<JwtResponse> refreshToken(HttpServletRequest request){
         String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if(authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")){
@@ -111,8 +118,25 @@ public class AuthenticationService {
 
             saveUserToken(accessToken, refreshToken, user);
 
-            return new ResponseEntity<>(new JwtResponse(accessToken, refreshToken), HttpStatus.OK);
+            return ResponseEntity.ok(new JwtResponse(accessToken, refreshToken));
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    private Authentication authentication(String username, String password){
+        try{
+            return authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            username,
+                            password
+                    )
+            );
+        } catch (BadCredentialsException e){
+            logger.error("Неверные учетные данные пользователя: {}", username);
+            throw new RuntimeException("Неверный логин или пароль!", e);
+        } catch (Exception e){
+            logger.error("Ошибка аутентификации пользователя: {}", username, e);
+            throw new RuntimeException("Ошибка аутентификации!", e);
+        }
     }
 }
