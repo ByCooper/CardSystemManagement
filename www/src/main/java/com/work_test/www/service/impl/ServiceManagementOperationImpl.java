@@ -42,7 +42,7 @@ public class ServiceManagementOperationImpl implements ServiceManagementOperatio
                 .cardNumber(numberCard)
                 .build();
         cardRepository.save(card);
-        return card;
+        return cardRepository.findByCardnumber(numberCard).orElseThrow();
     }
 
     /**
@@ -139,7 +139,7 @@ public class ServiceManagementOperationImpl implements ServiceManagementOperatio
         Card cardIn = entityManager.find(Card.class, cardIdInput);
         cardOut.setBalanceCard(cardOut.getBalanceCard() - sum);
         cardIn.setBalanceCard(cardIn.getBalanceCard() + sum);
-        return "Перевод между счетами " + '\n' + "Пополнение карты " + cardIdInput + " на сумму: " + sum + '\n' + "Списание с карты " + cardIdOutput + " на сумму: " + sum;
+        return "Перевод между счетами " + '\n' + "Пополнение карты " + cardIn.getCardNumber() + " на сумму: " + sum + '\n' + "Списание с карты " + cardOut.getCardNumber() + " на сумму: " + sum;
     }
 
     /**
